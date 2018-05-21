@@ -23,6 +23,8 @@ typedef enum {
 
 #define error(s) fprintf(stdout, "[%s]: %s\n", __func__, s)
 
+#define debug(fmt, arg...) printf(fmt, ##arg)
+
 tree_t 	*tree_insert(tree_t *root, e_t val);
 tree_t 	*tree_delete(tree_t *root, e_t val);
 void 	tree_destroy(tree_t *root);
@@ -37,7 +39,32 @@ static void tree_postOrderTraverse(tree_t *root);
 
 int main(int argc, char **argv)
 {
+	tree_t *root = NULL;
+	
+	int i;
+	for(i=0; i<10; i++) 
+		root = tree_insert(root, i);
+	tree_print(root, PREORDER);
+	tree_print(root, INORDER);
+	tree_print(root, POSTORDER);
+	
+	tree_t *cell;
+	cell = tree_findMin(root);
+	printf("min address: %p\n", cell);
+	cell = tree_findMax(root);
+	printf("max address: %p\n", cell);
+	cell = tree_find(root, 5);
+	printf("val 5 address: %p\n", cell);
 
+	root = tree_delete(root, 6);
+	tree_print(root, INORDER);
+	root = tree_delete(root, 6);
+	
+	cell = tree_find(root, 6);
+	printf("val 6 address: %p\n", cell);
+
+	tree_destroy(root);
+	tree_print(root, INORDER);
 	return 0;
 }
 
@@ -53,7 +80,7 @@ tree_t *tree_insert(tree_t *root, e_t val)
 		root->val = val;
 		root->left = NULL;
 		root->right = NULL;
-		
+		debug("tree_insert: %p, %d\n", root, root->val);	
 	}
 	else if(root->val > val) {
 		root->left = tree_insert(root->left, val);
@@ -101,7 +128,7 @@ tree_t *tree_delete(tree_t *root, e_t val)
 
 void tree_destroy(tree_t *root)
 {
-	if(!root) {
+	if(root) {
 		if(root->left) {
 			tree_destroy(root->left);
 		}
@@ -133,18 +160,22 @@ void tree_print(tree_t *root, tm_t method)
 {
 	switch(method) {
 		case PREORDER:
+			fprintf(stdout, "[preorder]: ");
 			tree_preOrderTraverse(root);
 			break;
 		case INORDER:
+			fprintf(stdout, "[inorder]: ");
 			tree_inOrderTraverse(root);
 			break;
 		case POSTORDER:
+			fprintf(stdout, "[postorder]: ");
 			tree_postOrderTraverse(root);
 			break;
 		default:
 			error("no such order");
 			break;
 	}
+	putchar('\n');
 }
 
 tree_t *tree_findMin(tree_t *root)
@@ -174,7 +205,7 @@ tree_t *tree_findMax(tree_t *root)
 
 static void tree_preOrderTraverse(tree_t *root)
 {
-	if(!root) {
+	if(root) {
 		fprintf(stdout, "%d ", root->val);
 		tree_preOrderTraverse(root->left);
 		tree_preOrderTraverse(root->right);
@@ -183,7 +214,7 @@ static void tree_preOrderTraverse(tree_t *root)
 
 static void tree_inOrderTraverse(tree_t *root)
 {
-	if(!root) {
+	if(root) {
 		tree_preOrderTraverse(root->left);
 		fprintf(stdout, "%d ", root->val);
 		tree_preOrderTraverse(root->right);
@@ -192,7 +223,7 @@ static void tree_inOrderTraverse(tree_t *root)
 
 static void tree_postOrderTraverse(tree_t *root)
 {
-	if(!root) {
+	if(root) {
 		tree_preOrderTraverse(root->left);
 		tree_preOrderTraverse(root->right);
 		fprintf(stdout, "%d ", root->val);
